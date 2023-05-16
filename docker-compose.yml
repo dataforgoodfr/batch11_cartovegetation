@@ -1,0 +1,17 @@
+version: '1'
+services:
+  qgis:
+    build: ./docker/qgis/
+    image: cartovegetation-qgis
+    volumes:
+      - C:/Users/decau/Documents/Informatique/cartovegetation/batch11_cartovegetation/scripts/basicQGIS.py:/app/app.py
+  otb:
+    depends_on:
+      qgis:
+        condition: service_completed_successfully
+        restart: true
+    build: ./docker/otb/
+    image: cartovegetation-otb
+    volumes:
+      - C:/Users/decau/Documents/Informatique/cartovegetation/batch11_cartovegetation/scripts/basicOTB.py:/app/app.py
+  
