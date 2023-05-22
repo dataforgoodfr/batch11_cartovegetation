@@ -4,7 +4,7 @@ services:
     image: cartovegetation-otb
     volumes:
       # Main Script
-      - C:/Users/decau/Documents/Informatique/cartovegetation/batch11_cartovegetation/scripts/seg.py:/app/app.py
+      - <HOST SEGMENTATION SCRIPT PATH>:/app/app.py
       # Data
       - <HOST DATA PATH>:/app/data
   hte:
@@ -12,7 +12,7 @@ services:
     image: cartovegetation-otb
     volumes:
       # Main Script
-      - C:/Users/decau/Documents/Informatique/cartovegetation/batch11_cartovegetation/scripts/hte.py:/app/app.py
+      - <HOST HARALICK_TEXTURE_EXTRACTION SCRIPT PATH>:/app/app.py
       # Data
       - <HOST DATA PATH>:/app/data
   rdi:
@@ -20,6 +20,6 @@ services:
     image: cartovegetation-otb
     volumes:
       # Main Script
-      - C:/Users/decau/Documents/Informatique/cartovegetation/batch11_cartovegetation/scripts/rdi.py:/app/app.py
+      - <HOST RADIOMETRIC_INDICES SCRIPT PATH>:/app/app.py
       # Data
       - <HOST DATA PATH>:/app/data
