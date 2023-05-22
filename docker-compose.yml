@@ -1,17 +1,25 @@
-version: '1'
 services:
-  qgis:
-    build: ./docker/qgis/
-    image: cartovegetation-qgis
-    volumes:
-      - C:/Users/decau/Documents/Informatique/cartovegetation/batch11_cartovegetation/scripts/basicQGIS.py:/app/app.py
-  otb:
-    depends_on:
-      qgis:
-        condition: service_completed_successfully
-        restart: true
+  segmentation:
     build: ./docker/otb/
     image: cartovegetation-otb
     volumes:
-      - C:/Users/decau/Documents/Informatique/cartovegetation/batch11_cartovegetation/scripts/basicOTB.py:/app/app.py
-  
+      # Main Script
+      - C:/Users/decau/Documents/Informatique/cartovegetation/batch11_cartovegetation/scripts/seg.py:/app/app.py
+      # Data
+      - <HOST DATA PATH>:/app/data
+  hte:
+    build: ./docker/otb/
+    image: cartovegetation-otb
+    volumes:
+      # Main Script
+      - C:/Users/decau/Documents/Informatique/cartovegetation/batch11_cartovegetation/scripts/hte.py:/app/app.py
+      # Data
+      - <HOST DATA PATH>:/app/data
+  rdi:
+    build: ./docker/otb/
+    image: cartovegetation-otb
+    volumes:
+      # Main Script
+      - C:/Users/decau/Documents/Informatique/cartovegetation/batch11_cartovegetation/scripts/rdi.py:/app/app.py
+      # Data
+      - <HOST DATA PATH>:/app/data
