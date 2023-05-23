@@ -2,7 +2,7 @@ import os
 import otbApplication as otb
 
 # TODO ENV
-os.environ['OTB_MAX_RAM_HINT'] = '1024'
+os.environ['OTB_MAX_RAM_HINT'] = '256'
 os.environ['OTB_LOGGER_LEVEL'] = 'DEBUG'
 
 ## DATA

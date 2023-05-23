@@ -103,6 +103,7 @@ celerybeat.pid
 
 # Environments
 .env
+!.otb.env
 .venv
 env/
 venv/
@@ -132,4 +133,8 @@ dmypy.json
 # VScode
 .vs
 
+# Data folder
 data
+
+# Jupyter
+jupyter

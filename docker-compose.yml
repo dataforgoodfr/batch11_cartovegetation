@@ -1,25 +1,42 @@
 services:
-  segmentation:
+  seg:
     build: ./docker/otb/
     image: cartovegetation-otb
+    environment:
+      - otb.env
     volumes:
       # Main Script
-      - <HOST SEGMENTATION SCRIPT PATH>:/app/app.py
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/seg.py:/app/app.py
       # Data
-      - <HOST DATA PATH>:/app/data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+    
   hte:
     build: ./docker/otb/
     image: cartovegetation-otb
+    environment:
+      - otb.env
     volumes:
       # Main Script
-      - <HOST HARALICK_TEXTURE_EXTRACTION SCRIPT PATH>:/app/app.py
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/hte.py:/app/app.py
       # Data
-      - <HOST DATA PATH>:/app/data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
   rdi:
     build: ./docker/otb/
     image: cartovegetation-otb
+    environment:
+      - otb.env
     volumes:
       # Main Script
-      - <HOST RADIOMETRIC_INDICES SCRIPT PATH>:/app/app.py
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/rdi.py:/app/app.py
       # Data
-      - <HOST DATA PATH>:/app/data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+  # zst:
+  #   build: ./docker/otb/
+  #   image: cartovegetation-otb
+  #   environment:
+  #     - otb.env
+  #   volumes:
+  #     # Main Script
+  #     - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/zst.py:/app/app.py
+  #     # Data
+  #     - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
