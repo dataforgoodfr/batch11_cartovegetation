@@ -3,7 +3,7 @@
 ### Requirements
 
 - Docker and Docker compose must be installed [Docker (Docker compose included)](https://www.docker.com/products/docker-desktop/)
-- Until data gathering is implemented, it is necessary to have a data folder containing a geoTIFF file representing a region the size of a town (for test purpose, full automatisation is not yet implemented since it recquires an IGN web service for data import that is scheduled to be launch in beta version mid-july)
+- Until data gathering is implemented, it is required to have a data folder in your system containing the unzipped data from IGN BD ORTHO IRC of the 'departement' that contain the processed city. *For test purpose, full automatisation is not yet implemented since it recquires an IGN web service for data import that is scheduled to be launch in beta version mid-july*
 
 ### Install
 
