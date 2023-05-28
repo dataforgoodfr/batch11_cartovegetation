@@ -1,12 +1,11 @@
 import os
 import otbApplication as otb
 
-# TODO ENV
-os.environ['OTB_MAX_RAM_HINT'] = '256'
-os.environ['OTB_LOGGER_LEVEL'] = 'DEBUG'
 
 ## DATA
 data_folder = os.path.normpath('/app/data')
+
+code_insee = os.getenv('CODE_INSEE')
 
 try:
     os.makedirs(data_folder)
@@ -14,11 +13,11 @@ except FileExistsError:
     pass
 
 # TODO dynamic input file and verify input exist
-input_filename = 'artassenx.tif'
+input_filename = f'{code_insee}.tif'
 input_filepath = os.path.join(data_folder, input_filename)
 
-output_filename = f'{os.path.splitext(input_filename)[0]}_rdi.tif'
-output_filepath = os.path.join(data_folder, output_filename)
+# output_filename = f'{os.path.splitext(input_filename)[0]}_rdi.tif'
+# output_filepath = os.path.join(data_folder, output_filename)
 
 
 ## PROCESSING
@@ -51,18 +50,25 @@ Soil:BI2                            Brightness index 2 (NIR, Red, Green)
 BuiltUp:ISU                         Built Surfaces Index (NIR,Red)
 '''
 
-params = {
-    'in': input_filepath,
-    'out': output_filepath,
-    'channels.blue': 4,
-    'channels.green': 3,
-    'channels.red': 2,
-    'channels.nir': 1,
-    'channels.mir': 4,
-    'list': ['Vegetation:MSAVI2', 'Water:NDWI2', 'Soil:BI2'],
-    'ram': int(os.getenv('OTB_MAX_RAM_HINT'))
-}
+indices = ['Vegetation:MSAVI2', 'Water:NDWI2', 'Soil:BI2']
 
-app.SetParameters(params)
+for indice in indices:
+    indice_acronym = indice.split(':')[1]
+    output_filename = f'{code_insee}_rdi_{indice_acronym}.tif'
+    output_filepath = os.path.join(data_folder, output_filename)
 
-app.ExecuteAndWriteOutput()
+    params = {
+        'in': input_filepath,
+        'out': output_filepath,
+        'channels.blue': 4,
+        'channels.green': 3,
+        'channels.red': 2,
+        'channels.nir': 1,
+        'channels.mir': 4,
+        'list': [indice],
+        'ram': int(os.getenv('OTB_MAX_RAM_HINT'))
+    }
+
+    app.SetParameters(params)
+
+    app.ExecuteAndWriteOutput()

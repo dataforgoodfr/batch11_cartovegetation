@@ -1,42 +1,86 @@
 services:
+  ext:
+    build: ./docker/gdal/
+    image: cartovegetation-gdal
+    env_file:
+      - ./docker/gdal/.gdal.env
+      - .env
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/ext.py:/app/app.py
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
   seg:
+    depends_on:
+      ext:
+        condition: service_completed_successfully
     build: ./docker/otb/
     image: cartovegetation-otb
-    environment:
-      - otb.env
+    env_file:
+      - ./docker/otb/.otb.env
+      - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/seg.py:/app/app.py
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
-    
   hte:
+    depends_on:
+      ext:
+        condition: service_completed_successfully
     build: ./docker/otb/
     image: cartovegetation-otb
-    environment:
-      - otb.env
+    env_file:
+      - ./docker/otb/.otb.env
+      - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/hte.py:/app/app.py
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+  bnd:
+    depends_on:
+      hte:
+        condition: service_completed_successfully
+    build: ./docker/gdal/
+    image: cartovegetation-gdal
+    env_file:
+      - ./docker/gdal/.gdal.env
+      - .env
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/bnd.py:/app/app.py
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
   rdi:
+    depends_on:
+      ext:
+        condition: service_completed_successfully
     build: ./docker/otb/
     image: cartovegetation-otb
-    environment:
-      - otb.env
+    env_file:
+      - ./docker/otb/.otb.env
+      - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/rdi.py:/app/app.py
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
-  # zst:
-  #   build: ./docker/otb/
-  #   image: cartovegetation-otb
-  #   environment:
-  #     - otb.env
-  #   volumes:
-  #     # Main Script
-  #     - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/zst.py:/app/app.py
-  #     # Data
-  #     - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+  zst:
+    depends_on:
+      seg:
+        condition: service_completed_successfully
+      bnd:
+        condition: service_completed_successfully
+      rdi:
+        condition: service_completed_successfully
+    build: ./docker/qgis/
+    image: cartovegetation-qgis
+    env_file:
+      - ./docker/qgis/.qgis.env
+      - .env
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/zst.py:/app/app.py
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data

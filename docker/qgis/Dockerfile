@@ -1,5 +1,11 @@
 FROM qgis/qgis:release-3_28
 
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED=1
+
 ENV QT_QPA_PLATFORM=offscreen
 
 WORKDIR /app
@@ -15,3 +21,4 @@ USER appuser
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
 CMD ["python3.10", "app.py"]
+# CMD ["/bin/sh"]

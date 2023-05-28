@@ -1,13 +1,11 @@
 import os
 import otbApplication as otb
 
-# TODO ENV
-os.environ['OTB_MAX_RAM_HINT'] = '256'
-os.environ['OTB_LOGGER_LEVEL'] = 'DEBUG'
-
 
 ## DATA
 data_folder = os.path.normpath('/app/data')
+
+code_insee = os.getenv('CODE_INSEE')
 
 try:
     os.makedirs(data_folder)
@@ -15,10 +13,10 @@ except FileExistsError:
     pass
 
 # TODO dynamic input file and verify input exist
-input_filename = 'artassenx.tif'
+input_filename = f'{code_insee}.tif'
 input_filepath = os.path.join(data_folder, input_filename)
 
-output_filename = f'{os.path.splitext(input_filename)[0]}_seg.gpkg'
+output_filename = f'{code_insee}_seg.gpkg'
 output_filepath = os.path.join(data_folder, output_filename)
 
 

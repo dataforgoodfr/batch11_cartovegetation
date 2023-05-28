@@ -1,4 +1,4 @@
-FROM orfeotoolbox/otb:8.1.1
+FROM ghcr.io/osgeo/gdal:alpine-normal-3.6.3
 
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -6,15 +6,14 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
-# install pip
-RUN apt update
-RUN apt install -y python3-pip
-
-# Install pip requirements
-COPY requirements.txt .
-RUN python3.8 -m pip install -r requirements.txt
-
 WORKDIR /app
+
+COPY requirements.txt requirements.txt 
+
+RUN apk update 
+RUN apk add build-base python3-dev py3-pip libffi-dev openssl-dev geos-dev proj-dev proj-util
+
+RUN pip install -r requirements.txt
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
@@ -22,4 +21,4 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-CMD ["python3.8", "app.py"]
+CMD ["python3.10", "app.py"]

@@ -1,3 +1,4 @@
+
 # batch11_cartovegetation
 ### Requirements
 
@@ -13,6 +14,7 @@ git clone https://github.com/dataforgoodfr/batch11_cartovegetation.git
 
 - Current branch for data processing is accessed using:
 ```shell
+git fetch --all
 git switch project-init
 ```
 
@@ -42,4 +44,13 @@ To run specific service defined in *docker-compose.yaml*:
 docker compose run --rm --env .env <service_name>
 ```
 
+### Glossary
 
+| id | Definition |
+|--|--|
+| ext | Extraction of area |
+| seg | Segmentation |
+| hte | Haralick texture extraction |
+| bnd | Reordering band |
+| rdi | Radiometric indices |
+| zst | Zonal Statistics |
