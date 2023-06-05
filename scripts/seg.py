@@ -28,10 +28,10 @@ app = otb.Registry.CreateApplication("Segmentation")
 params = {
     'in': input_filepath,
     'filter': 'meanshift',
-    'filter.meanshift.spatialr': 5,
-    'filter.meanshift.ranger': 15,
+    'filter.meanshift.spatialr': 20,
+    'filter.meanshift.ranger': 10,
     'filter.meanshift.thres': 0.1,
-    'filter.meanshift.maxiter': 100,
+    'filter.meanshift.maxiter': 200,
     'filter.meanshift.minsize': 100, 
     'mode': 'vector',
     'mode.vector.out': output_filepath,

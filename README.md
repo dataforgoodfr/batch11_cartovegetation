@@ -1,5 +1,6 @@
 
 # batch11_cartovegetation
+
 ### Requirements
 
 - Docker and Docker compose must be installed [Docker (Docker compose included)](https://www.docker.com/products/docker-desktop/)
@@ -18,7 +19,7 @@ git fetch --all
 git switch project-init
 ```
 
-- Rename the file `.env.sample` to `.env` and update its variables using your configuration.
+- Copy then rename the file `.env.sample` to `.env` and update its variables using your configuration.
 
 - `.otb.env` contains variables that can also be tweaked.
 
