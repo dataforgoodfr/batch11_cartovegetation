@@ -84,25 +84,6 @@ services:
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/zst.py:/app/app.py
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
-
-  # zst:
-  #   depends_on:
-  #     seg:
-  #       condition: service_completed_successfully
-  #     bnd:
-  #       condition: service_completed_successfully
-  #     rdi:
-  #       condition: service_completed_successfully
-  #   build: ./docker/qgis/
-  #   image: cartovegetation-qgis
-  #   env_file:
-  #     - ./docker/qgis/.qgis.env
-  #     - .env
-  #   volumes:
-  #     # Main Script
-  #     - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/zst.py:/app/app.py
-  #     # Data
-  #     - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
   agg:
     depends_on:
       zst:
@@ -117,3 +98,19 @@ services:
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/agg.py:/app/app.py
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+  mdl:
+    depends_on:
+      agg:
+        condition: service_completed_successfully
+    build: ./docker/gdal/
+    image: cartovegetation-gdal
+    env_file:
+      - ./docker/gdal/.gdal.env
+      - .env
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/mdl.py:/app/app.py
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+      # Model
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/models:/app/models

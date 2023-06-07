@@ -2,3 +2,4 @@ requests
 geopandas
 rasterio
 rasterstats
+imbalanced-learn

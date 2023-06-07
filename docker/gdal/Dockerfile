@@ -8,10 +8,10 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt 
-
 RUN apk update 
-RUN apk add build-base python3-dev py3-pip libffi-dev openssl-dev geos-dev proj-dev proj-util
+RUN apk add build-base python3-dev py3-pip libffi-dev openssl-dev geos-dev proj-dev proj-util py3-scikit-learn
+
+COPY requirements.txt requirements.txt 
 
 RUN pip install -r requirements.txt
 

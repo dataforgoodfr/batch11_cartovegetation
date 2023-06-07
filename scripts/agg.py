@@ -1,10 +1,6 @@
 import os
-import re
-
-import logging
 
 import geopandas as gpd
-import pandas as pd
 
 
 ### DATA ###
@@ -28,13 +24,18 @@ vector_filepaths = [os.path.join(data_folder, f'{code_insee}_{processing_id}_zst
 
 # ### JOIN ###
 
+def get_mean_serie(processing_id):
+    vector_filepath = os.path.join(data_folder, f'{code_insee}_{processing_id}_zst.gpkg')
+    feature_name = f'mean_{processing_id}'
+    gdf = gpd.read_file(vector_filepath)
+    gdf = gdf.set_index('DN')
+    return gdf[feature_name]
+    
+
 output = gpd.read_file(vector_filepaths[0])
-output = output
-for idx, vector_filepath in enumerate(vector_filepaths[1:]):
-    result = re.search(r'\d{5}_(.*)_zst\.gpkg', vector_filepath)
-    mean_column_name = f'mean_{result.group(1)}'
-    mean_serie = gpd.read_file(vector_filepath).set_index('DN')[mean_column_name]
-    output = output.join(mean_serie, on='DN')
+for idx, processing_id in enumerate(processing_ids[1:]):
+    output = output.join(get_mean_serie(processing_id), on='DN')
+
 
 gdf = gpd.GeoDataFrame(output, geometry="geometry")
 gdf.to_file(output_filepath, driver="GPKG")

@@ -42,7 +42,7 @@ docker compose down
 
 To run specific service defined in *docker-compose.yaml*:
 ```shell
-docker compose run --rm --env .env <service_name>
+docker compose run --rm --env .env --no-deps <service_name>
 ```
 
 ### Glossary
