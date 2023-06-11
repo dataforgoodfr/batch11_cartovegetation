@@ -21,7 +21,7 @@ git switch project-init
 
 - Copy then rename the file `.env.sample` to `.env` and update its variables using your configuration.
 
-- `.otb.env` contains variables that can also be tweaked.
+- Check `config/config.toml` and update it if needed.
 
 ### Build Images
 ```shell
@@ -55,3 +55,4 @@ docker compose run --rm --env .env --no-deps <service_name>
 | bnd | Reordering band |
 | rdi | Radiometric indices |
 | zst | Zonal Statistics |
+| agg | Joining zonal statistics |
