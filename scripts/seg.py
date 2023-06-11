@@ -1,30 +1,47 @@
 import os
+import sys
+import time
+import toml
+import logging
+
 import otbApplication as otb
 
 
-## DATA
+start_time = time.time()
+
 data_folder = os.path.normpath('/app/data')
 
-code_insee = os.getenv('CODE_INSEE')
+# Logger
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+root_logger.addHandler(console_handler)
+
+# Config
+config = toml.load('/app/config/config.toml')
+code_insee = config['city']['CODE_INSEE']
+
+# Setup data folders
+city_folder = os.path.join(data_folder, code_insee)
+segmentation_folder = os.path.join(city_folder, 'segmentation')
 
 try:
-    os.makedirs(data_folder)
-except FileExistsError:
+    os.makedirs(segmentation_folder)  
+except FileExistsError as e:
     pass
 
-# TODO dynamic input file and verify input exist
-input_filename = f'{code_insee}.tif'
-input_filepath = os.path.join(data_folder, input_filename)
-
-output_filename = f'{code_insee}_seg.gpkg'
-output_filepath = os.path.join(data_folder, output_filename)
-
-
-## PROCESSING
+# Processing
 app = otb.Registry.CreateApplication("Segmentation")
 
-# TODO config file
-# Documentation : https://www.orfeo-toolbox.org/CookBook/Applications/app_Segmentation.html?highlight=segmentation
+input_filepath = os.path.join(city_folder, f'{code_insee}.tif')
+output_filepath = os.path.join(segmentation_folder, f'{code_insee}_seg.gpkg')
+
 params = {
     'in': input_filepath,
     'filter': 'meanshift',
@@ -48,5 +65,8 @@ params = {
 }
 
 app.SetParameters(params)
-
 app.ExecuteAndWriteOutput()
+
+# Elapsed time
+elapsed_time = time.time() - start_time
+logging.info(f"Segmentation computation time: {elapsed_time: .2f}s")

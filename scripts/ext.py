@@ -1,15 +1,43 @@
 import os
-from pathlib import Path
-import requests
+import sys
+import time
+import toml
 import json
-from osgeo import gdal
+import logging
+
+import requests
+
+from pathlib import Path
+
 import geopandas as gpd
+
+from osgeo import gdal
+
 import rasterio
 from rasterio.mask import mask
 
 
-code_insee = os.getenv('CODE_INSEE')
+start_time = time.time()
 
+data_folder = os.path.normpath('/app/data')
+
+# Logger
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+root_logger.addHandler(console_handler)
+
+# Config
+config = toml.load('/app/config/config.toml')
+code_insee = config['city']['CODE_INSEE']
+
+# Get city boundaries using IGN TOPO BD
 url_topo = 'https://wxs.ign.fr/topographie/geoportail/wfs?'
 
 params_get_features = {
@@ -21,15 +49,18 @@ params_get_features = {
     'outputFormat' : 'json'
 }
 
-# Send the HTTP GET request to the WFS endpoint
 response = requests.get(url_topo, params=params_get_features)
-
-# Read the GeoJSON response using geopandas
 commune = gpd.read_file(json.dumps(response.json()))
 commune.crs = "EPSG:4326"
 
-## DATA
-data_folder = os.path.normpath('/app/data')
+# Setup data folders
+city_folder = os.path.join(data_folder, code_insee)
+
+try:
+    os.makedirs(city_folder)  
+except FileExistsError as e:
+    pass
+
 
 data_subfolders = [name for name in os.listdir(data_folder) if os.path.isdir(os.path.join(data_folder, name))]
 
@@ -56,10 +87,7 @@ for root, dirs, files in os.walk(departement_folder):
                 if os.path.isdir(os.path.join(livraison_folder, name)):
                     tiles_folderpath = Path(os.path.join(livraison_folder, name))
 
-# TODO à automatiser
-path = Path('/app/data/ORTHOHR_1-0_IRC-0M20_JP2-E080_LAMB93_D091_2021-01-01/ORTHOHR/1_DONNEES_LIVRAISON_2022-06-00154/OHR_IRC_0M20_JP2-E080_LAMB93_D91-2021')
-
-vrt_filepath = os.path.join(data_folder, f'{code_insee}.vrt')
+vrt_filepath = os.path.join(city_folder, f'{code_departement}.vrt')
 
 tiles_filepaths = [str(x) for x in tiles_folderpath.rglob('*.jp2')]  # list of paths to raster files
 dataset = gdal.BuildVRT(vrt_filepath, tiles_filepaths)
@@ -70,10 +98,15 @@ with rasterio.open(vrt_filepath) as raster_vrt:
     cropped, crop_trans = mask(raster_vrt, [communeL93.iloc[0].geometry], crop=True)
 
 # Specify the path where you want to save the GeoTIFF file
-output_path = os.path.join(data_folder, f'{code_insee}.tif')
+output_path = os.path.join(city_folder, f'{code_insee}.tif')
 
 # Open a new GeoTIFF file in write mode
 with rasterio.open(output_path, 'w', driver='GTiff', height=cropped.shape[1], width=cropped.shape[2], count=cropped.shape[0], dtype=cropped.dtype, crs=raster_vrt.crs, transform=crop_trans) as dst:
     # Write the cropped data to the GeoTIFF file
     dst.write(cropped)
 
+os.remove(vrt_filepath)
+
+# Elapsed time
+elapsed_time = time.time() - start_time
+logging.info(f"Joining execution time: {elapsed_time: .2f}s")

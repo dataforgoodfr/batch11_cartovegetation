@@ -3,13 +3,15 @@ services:
     build: ./docker/gdal/
     image: cartovegetation-gdal
     env_file:
-      - ./docker/gdal/.gdal.env
       - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/ext.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+
   seg:
     depends_on:
       ext:
@@ -17,11 +19,12 @@ services:
     build: ./docker/otb/
     image: cartovegetation-otb
     env_file:
-      - ./docker/otb/.otb.env
       - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/seg.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
   hte:
@@ -31,11 +34,12 @@ services:
     build: ./docker/otb/
     image: cartovegetation-otb
     env_file:
-      - ./docker/otb/.otb.env
       - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/hte.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
   bnd:
@@ -45,11 +49,12 @@ services:
     build: ./docker/gdal/
     image: cartovegetation-gdal
     env_file:
-      - ./docker/gdal/.gdal.env
       - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/bnd.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
   rdi:
@@ -59,11 +64,12 @@ services:
     build: ./docker/otb/
     image: cartovegetation-otb
     env_file:
-      - ./docker/otb/.otb.env
       - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/rdi.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
   zst:
@@ -74,14 +80,15 @@ services:
         condition: service_completed_successfully
       rdi:
         condition: service_completed_successfully
-    build: ./docker/gdal/
-    image: cartovegetation-gdal
+    build: ./docker/exactextract/
+    image: cartovegetation-exactextract
     env_file:
-      - ./docker/gdal/.gdal.env
       - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/zst.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
   agg:
@@ -91,11 +98,12 @@ services:
     build: ./docker/gdal/
     image: cartovegetation-gdal
     env_file:
-      - ./docker/gdal/.gdal.env
       - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/agg.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
   mdl:
@@ -105,11 +113,12 @@ services:
     build: ./docker/gdal/
     image: cartovegetation-gdal
     env_file:
-      - ./docker/gdal/.gdal.env
       - .env
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/mdl.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
       # Data
       - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
       # Model

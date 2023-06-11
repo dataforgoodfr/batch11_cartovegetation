@@ -2,3 +2,4 @@ numpy==1.24.3
 requests
 geopandas==0.10.2
 rasterio
+toml

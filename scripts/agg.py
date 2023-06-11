@@ -1,41 +1,62 @@
 import os
+import sys
+import time
+import toml
+import logging
 
+import pandas as pd
 import geopandas as gpd
 
 
-### DATA ###
+start_time = time.time()
 
 data_folder = os.path.normpath('/app/data')
 
-code_insee = os.getenv('CODE_INSEE')
+# Logger
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+root_logger.addHandler(console_handler)
+
+# Config
+config = toml.load('/app/config/config.toml')
+code_insee = config['city']['CODE_INSEE']
+
+# Setup data folders
+city_folder = os.path.join(data_folder, code_insee)
+segmentation_folder = os.path.join(city_folder, 'segmentation')
+zst_folder = os.path.join(city_folder, 'zonal_stats')
+zst_final_folder = os.path.join(zst_folder, 'final')
 
 try:
-    os.makedirs(data_folder)
-except FileExistsError:
+    os.makedirs(zst_final_folder)  
+except FileExistsError as e:
     pass
 
-# TODO dynamic input file and verify input exist
-input_filepath = os.path.join(data_folder, f'{code_insee}.tif')
-output_filepath = os.path.join(data_folder, f'{code_insee}_zst.gpkg')
+# Read vector file reference
+output_df = gpd.read_file(os.path.join(segmentation_folder, f'{code_insee}_seg.gpkg'))
 
-processing_ids = ['hte_IC1', 'rdi_BI2', 'rdi_MSAVI2', 'rdi_NDWI2']
-vector_filepaths = [os.path.join(data_folder, f'{code_insee}_{processing_id}_zst.gpkg') for processing_id in processing_ids]
+# Join features to vector file using common 'DN' segment identifier
+feature_filenames = [item for item in os.listdir(zst_folder) if os.path.isfile(os.path.join(zst_folder, item))]
+for zst_filename in feature_filenames:
+    zst_filepath = os.path.join(zst_folder, zst_filename)
+    zst_df = pd.read_csv(zst_filepath).set_index('DN')
+    output_df = output_df.join(zst_df, on='DN')
+    logging.info(f"Joined: {zst_filename}")
 
+# Convert dataframe to geodataframe
+output_gdf = gpd.GeoDataFrame(output_df, geometry="geometry")
 
-# ### JOIN ###
+# Save in file
+output_filepath = os.path.join(zst_final_folder, f'{code_insee}_zst.gpkg')
+output_gdf.to_file(output_filepath, driver="GPKG")
 
-def get_mean_serie(processing_id):
-    vector_filepath = os.path.join(data_folder, f'{code_insee}_{processing_id}_zst.gpkg')
-    feature_name = f'mean_{processing_id}'
-    gdf = gpd.read_file(vector_filepath)
-    gdf = gdf.set_index('DN')
-    return gdf[feature_name]
-    
-
-output = gpd.read_file(vector_filepaths[0])
-for idx, processing_id in enumerate(processing_ids[1:]):
-    output = output.join(get_mean_serie(processing_id), on='DN')
-
-
-gdf = gpd.GeoDataFrame(output, geometry="geometry")
-gdf.to_file(output_filepath, driver="GPKG")
+# Elapsed time
+elapsed_time = time.time() - start_time
+logging.info(f"Zonal statistics joining time: {elapsed_time: .2f}s")

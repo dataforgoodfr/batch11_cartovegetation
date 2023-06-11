@@ -1,0 +1,3 @@
+[submodule "docker/exactextract"]
+	path = docker/exactextract
+	url = https://github.com/isciences/exactextract.git

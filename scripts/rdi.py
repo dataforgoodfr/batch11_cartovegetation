@@ -1,61 +1,57 @@
 import os
+import sys
+import time
+import toml
+import logging
+
 import otbApplication as otb
 
 
-## DATA
+start_time = time.time()
+
 data_folder = os.path.normpath('/app/data')
 
-code_insee = os.getenv('CODE_INSEE')
+# Logger
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+root_logger.addHandler(console_handler)
+
+# Config
+config = toml.load('/app/config/config.toml')
+code_insee = config['city']['CODE_INSEE']
+config_otb = config['otb']
+
+# Setup data folders
+city_folder = os.path.join(data_folder, code_insee)
+features_folder = os.path.join(city_folder, 'features')
 
 try:
-    os.makedirs(data_folder)
-except FileExistsError:
+    os.makedirs(features_folder)  
+except FileExistsError as e:
     pass
 
-# TODO dynamic input file and verify input exist
-input_filename = f'{code_insee}.tif'
-input_filepath = os.path.join(data_folder, input_filename)
+# Select features to compute
+features = []
+for section_key, section_value in config['radiometrics'].items():
+    for feature, filter_bool in section_value.items():
+        if filter_bool:
+            features.append(feature)
 
-# output_filename = f'{os.path.splitext(input_filename)[0]}_rdi.tif'
-# output_filepath = os.path.join(data_folder, output_filename)
-
-
-## PROCESSING
+# Processing
 app = otb.Registry.CreateApplication("RadiometricIndices")
+input_filepath = os.path.join(city_folder, f'{code_insee}.tif')
 
-# TODO config file
-# Documentation : https://www.orfeo-toolbox.org/CookBook/Applications/app_RadiometricIndices.html?highlight=radiometric
-
-'''
-Vegetation:NDVI                     Normalized difference vegetation index (Red, NIR)
-Vegetation:TNDVI                    Transformed normalized difference vegetation index (Red, NIR)
-Vegetation:RVI                      Ratio vegetation index (Red, NIR)
-Vegetation:SAVI                     Soil adjusted vegetation index (Red, NIR)
-Vegetation:TSAVI                    Transformed soil adjusted vegetation index (Red, NIR)
-Vegetation:MSAVI                    Modified soil adjusted vegetation index (Red, NIR)
-Vegetation:MSAVI2                   Modified soil adjusted vegetation index 2 (Red, NIR)
-Vegetation:GEMI                     Global environment monitoring index (Red, NIR)
-Vegetation:IPVI                     Infrared percentage vegetation index (Red, NIR)
-Vegetation:LAIFromNDVILog           Leaf Area Index from log NDVI (Red, NIR)
-Vegetation::LAIFromReflLinear       Leaf Area Index from reflectances with linear combination (Red, NIR)
-Vegetation::LAIFromNDVIFormo        Leaf Area Index from Formosat 2 TOC (Red, NIR)
-Water:NDWI                          Normalized difference water index (Gao 1996) (NIR, MIR)
-Water:NDWI2                         Normalized difference water index (Mc Feeters 1996) (Green, NIR)
-Water:MNDWI                         Modified normalized difference water index (Xu 2006) (Green, MIR)
-Water:NDTI                          Normalized difference turbidity index (Lacaux et al.) (Red, Green)
-Soil:RI                             Redness index (Red, Green)
-Soil:CI                             Color index (Red, Green)
-Soil:BI                             Brightness index (Red, Green)
-Soil:BI2                            Brightness index 2 (NIR, Red, Green)
-BuiltUp:ISU                         Built Surfaces Index (NIR,Red)
-'''
-
-indices = ['Vegetation:MSAVI2', 'Water:NDWI2', 'Soil:BI2']
-
-for indice in indices:
-    indice_acronym = indice.split(':')[1]
-    output_filename = f'{code_insee}_rdi_{indice_acronym}.tif'
-    output_filepath = os.path.join(data_folder, output_filename)
+for feature in features:
+    feature_acronym = feature.split(':')[1]
+    output_filename = f'{code_insee}_rdi_{feature_acronym}.tif'
+    output_filepath = os.path.join(features_folder, output_filename)
 
     params = {
         'in': input_filepath,
@@ -65,10 +61,13 @@ for indice in indices:
         'channels.red': 2,
         'channels.nir': 1,
         'channels.mir': 4,
-        'list': [indice],
-        'ram': int(os.getenv('OTB_MAX_RAM_HINT'))
+        'list': [feature],
+        'ram': config_otb['OTB_MAX_RAM_HINT']
     }
 
     app.SetParameters(params)
-
     app.ExecuteAndWriteOutput()
+
+# Elapsed time
+elapsed_time = time.time() - start_time
+logging.info(f"Radiometric indices computation time: {elapsed_time: .2f}s")

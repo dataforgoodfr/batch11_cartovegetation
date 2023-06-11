@@ -3,3 +3,4 @@ geopandas
 rasterio
 rasterstats
 imbalanced-learn
+toml
