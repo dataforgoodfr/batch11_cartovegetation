@@ -35,7 +35,7 @@ CODE_INSEE = '91685'
 # Documentation: https://www.orfeo-toolbox.org/CookBook/Applications/app_HaralickTextureExtraction.html
 [haralick]
   [haralick.simple]
-  energy = true
+  energy = false
   entropy = false
   correlation = false
   inverse_difference_moment = false
