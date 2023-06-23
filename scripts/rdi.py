@@ -37,6 +37,10 @@ try:
 except FileExistsError as e:
     pass
 
+for filename in os.listdir(features_folder):
+    if 'rdi' in filename:
+        os.remove(os.path.join(features_folder, filename))
+
 # Select features to compute
 features = []
 for section_key, section_value in config['radiometrics'].items():

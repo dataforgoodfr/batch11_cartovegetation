@@ -3,6 +3,7 @@ import sys
 import time
 import toml
 import logging
+import shutil
 
 import otbApplication as otb
 
@@ -34,6 +35,12 @@ config_otb = config['otb']
 # Setup data folders
 city_folder = os.path.join(data_folder, code_insee)
 haralick_folder = os.path.join(city_folder, 'haralick')
+
+try:
+    if os.path.exists(haralick_folder) and os.path.isdir(haralick_folder):
+        shutil.rmtree(haralick_folder)
+except Exception as e:
+    logging.error(e)
 
 try:
     os.makedirs(haralick_folder)  

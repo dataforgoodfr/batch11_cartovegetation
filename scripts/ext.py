@@ -90,7 +90,9 @@ for root, dirs, files in os.walk(departement_folder):
 vrt_filepath = os.path.join(city_folder, f'{code_departement}.vrt')
 
 tiles_filepaths = [str(x) for x in tiles_folderpath.rglob('*.jp2')]  # list of paths to raster files
+
 dataset = gdal.BuildVRT(vrt_filepath, tiles_filepaths)
+
 dataset.FlushCache()
 
 communeL93 = commune.to_crs(epsg=2154)

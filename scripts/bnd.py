@@ -78,6 +78,10 @@ try:
 except FileExistsError as e:
     pass
 
+for filename in os.listdir(features_folder):
+    if 'hte' in filename:
+        os.remove(os.path.join(features_folder, filename))
+
 def process_hte_features(set: str):
     # Get features to compute
     if set == 'simple':
@@ -109,7 +113,11 @@ def process_hte_features(set: str):
         output_band.WriteArray(band_data)
 
         output_dataset.SetGeoTransform(dataset.GetGeoTransform())
+
+        logging.info(f'TEST2')
         output_dataset.SetProjection(dataset.GetProjection())
+
+        logging.info(f'TEST1')
 
         band = None
         dataset = None
