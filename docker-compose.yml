@@ -1,7 +1,7 @@
 services:
   ext:
     build: ./docker/gdal/
-    image: decauxclement/cartovegetation-gdal
+    image: cartovegetation-gdal
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/ext.py:/app/app.py
@@ -15,7 +15,7 @@ services:
       ext:
         condition: service_completed_successfully
     build: ./docker/otb/
-    image: decauxclement/cartovegetation-otb
+    image: cartovegetation-otb
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/seg.py:/app/app.py
@@ -28,7 +28,7 @@ services:
       ext:
         condition: service_completed_successfully
     build: ./docker/otb/
-    image: decauxclement/cartovegetation-otb
+    image: cartovegetation-otb
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/hte.py:/app/app.py
@@ -41,7 +41,7 @@ services:
       hte:
         condition: service_completed_successfully
     build: ./docker/gdal/
-    image: decauxclement/cartovegetation-gdal
+    image: cartovegetation-gdal
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/bnd.py:/app/app.py
@@ -54,7 +54,7 @@ services:
       ext:
         condition: service_completed_successfully
     build: ./docker/otb/
-    image: decauxclement/cartovegetation-otb
+    image: cartovegetation-otb
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/rdi.py:/app/app.py
@@ -71,7 +71,7 @@ services:
       rdi:
         condition: service_completed_successfully
     build: ./docker/exactextract/
-    image: decauxclement/cartovegetation-exactextract
+    image: cartovegetation-exactextract
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/zst.py:/app/app.py
@@ -84,7 +84,7 @@ services:
       zst:
         condition: service_completed_successfully
     build: ./docker/gdal/
-    image: decauxclement/cartovegetation-gdal
+    image: cartovegetation-gdal
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/agg.py:/app/app.py
@@ -97,7 +97,7 @@ services:
       agg:
         condition: service_completed_successfully
     build: ./docker/gdal/
-    image: decauxclement/cartovegetation-gdal
+    image: cartovegetation-gdal
     volumes:
       # Main Script
       - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/mdl.py:/app/app.py
