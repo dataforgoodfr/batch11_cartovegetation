@@ -56,3 +56,4 @@ docker compose run --rm --env .env --no-deps <service_name>
 | rdi | Radiometric indices |
 | zst | Zonal Statistics |
 | agg | Joining zonal statistics |
+| mdl | Classification |
