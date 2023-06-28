@@ -16,7 +16,6 @@ git clone https://github.com/dataforgoodfr/batch11_cartovegetation.git
 - Current branch for data processing is accessed using:
 ```shell
 git fetch --all
-git switch project-init
 ```
 
 - Copy then rename the file `.env.sample` to `.env` and update its variables using your configuration.
