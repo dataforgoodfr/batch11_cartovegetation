@@ -103,6 +103,7 @@ celerybeat.pid
 
 # Environments
 .env
+!.otb.env
 .venv
 env/
 venv/
@@ -127,3 +128,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.venv
+
+# VScode
+.vs
+
+# Data folder
+data
+
+# Jupyter
+jupyter

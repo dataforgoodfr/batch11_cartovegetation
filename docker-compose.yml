@@ -1,0 +1,109 @@
+services:
+  ext:
+    build: ./docker/gdal/
+    image: cartovegetation-gdal
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/ext.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+
+  seg:
+    depends_on:
+      ext:
+        condition: service_completed_successfully
+    build: ./docker/otb/
+    image: cartovegetation-otb
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/seg.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+  hte:
+    depends_on:
+      ext:
+        condition: service_completed_successfully
+    build: ./docker/otb/
+    image: cartovegetation-otb
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/hte.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+  bnd:
+    depends_on:
+      hte:
+        condition: service_completed_successfully
+    build: ./docker/gdal/
+    image: cartovegetation-gdal
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/bnd.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+  rdi:
+    depends_on:
+      ext:
+        condition: service_completed_successfully
+    build: ./docker/otb/
+    image: cartovegetation-otb
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/rdi.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+  zst:
+    depends_on:
+      seg:
+        condition: service_completed_successfully
+      bnd:
+        condition: service_completed_successfully
+      rdi:
+        condition: service_completed_successfully
+    build: ./docker/exactextract/
+    image: cartovegetation-exactextract
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/zst.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+  agg:
+    depends_on:
+      zst:
+        condition: service_completed_successfully
+    build: ./docker/gdal/
+    image: cartovegetation-gdal
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/agg.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+  mdl:
+    depends_on:
+      agg:
+        condition: service_completed_successfully
+    build: ./docker/gdal/
+    image: cartovegetation-gdal
+    volumes:
+      # Main Script
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/scripts/mdl.py:/app/app.py
+      # Config
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/config:/app/config
+      # Data
+      - ${DATA_ABSOLUTE_FOLDERPATH}:/app/data
+      # Model
+      - ${PROJECT_ABSOLUTE_FOLDERPATH}/models:/app/models

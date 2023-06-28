@@ -1,0 +1,75 @@
+[city]
+CODE_INSEE = '91685'
+
+# Documentation: https://www.orfeo-toolbox.org/CookBook/Applications/app_RadiometricIndices.html
+[radiometrics]
+  [radiometrics.Vegetation]
+  'Vegetation:NDVI' = false
+  'Vegetation:TNDVI' = false
+  'Vegetation:RVI' = false
+  'Vegetation:SAVI' = false
+  'Vegetation:TSAVI' = false
+  'Vegetation:MSAVI' = false
+  'Vegetation:MSAVI2' = true
+  'Vegetation:GEMI' = false
+  'Vegetation:IPVI' = false
+  'Vegetation:LAIFromNDVILog' = false
+  'Vegetation:LAIFromReflLinear' = false
+  'Vegetation:LAIFromNDVIFormo' = false
+
+  [radiometrics.Water]
+  'Water:NDWI' = false
+  'Water:NDWI2' = true
+  'Water:MNDWI' = false
+  'Water:NDTI' = false
+
+  [radiometrics.Soil]
+  'Soil:RI' = false
+  'Soil:CI' = false
+  'Soil:BI' = false
+  'Soil:BI2' = true
+
+  [radiometrics.BuiltUp]
+  'BuiltUp:ISU' = false
+
+# Documentation: https://www.orfeo-toolbox.org/CookBook/Applications/app_HaralickTextureExtraction.html
+[haralick]
+  [haralick.simple]
+  energy = false
+  entropy = false
+  correlation = false
+  inverse_difference_moment = false
+  inertia = false
+  cluster_shade = false
+  cluster_prominence = false
+  haralick_correlation = false
+
+  [haralick.advanced]
+  mean = false
+  variance = false
+  dissimilarity = false
+  sum_average = false
+  sum_variance = false
+  sum_entropy = false
+  difference_of_entropies = false
+  difference_of_variances = false
+  ic1 = true
+  ic2 = false
+
+  [haralick.higher]
+  short_run_emphasis = false
+  long_run_emphasis = false
+  grey_level_nonuniformity = false
+  run_length_nonuniformity = false
+  run_percentage = false
+  low_grey_level_run_emphasis = false
+  high_grey_level_run_emphasis = false
+  short_run_low_grey_level_emphasis = false
+  short_run_high_grey_level_emphasis = false
+  long_run_low_grey_level_emphasis = false
+  long_run_high_grey_level_emphasis = false
+
+# Documentation: https://www.orfeo-toolbox.org/CookBook/EnvironmentVariables.html
+[otb]
+OTB_MAX_RAM_HINT = 256
+OTB_LOGGER_LEVEL = 'INFO'
