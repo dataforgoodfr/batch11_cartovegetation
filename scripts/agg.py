@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 import toml
@@ -39,23 +40,33 @@ try:
 except FileExistsError as e:
     pass
 
-# Read vector file reference
-output_df = gpd.read_file(os.path.join(segmentation_folder, f'{code_insee}_seg.gpkg'))
+for segmentation_file in os.listdir(segmentation_folder):
+    pattern = r'\d{5}_(\d)_(.*)'
+    seg_tile_id = re.search(pattern, segmentation_file).group(1)
+    # Read vector file reference
+    output_df = gpd.read_file(os.path.join(segmentation_folder, segmentation_file))
 
-# Join features to vector file using common 'DN' segment identifier
-feature_filenames = [item for item in os.listdir(zst_folder) if os.path.isfile(os.path.join(zst_folder, item))]
-for zst_filename in feature_filenames:
-    zst_filepath = os.path.join(zst_folder, zst_filename)
-    zst_df = pd.read_csv(zst_filepath).set_index('DN')
-    output_df = output_df.join(zst_df, on='DN')
-    logging.info(f"Joined: {zst_filename}")
+    # Join features to vector file using common 'DN' segment identifier
+    feature_filenames = []
+    for item in os.listdir(zst_folder):
+        if os.path.isfile(os.path.join(zst_folder, item)):
+            item_tile_id = re.search(pattern, item).group(1)
+            if seg_tile_id == item_tile_id:
+                feature_filenames.append(item)
 
-# Convert dataframe to geodataframe
-output_gdf = gpd.GeoDataFrame(output_df, geometry="geometry")
+    
+    for zst_filename in feature_filenames:
+        zst_filepath = os.path.join(zst_folder, zst_filename)
+        zst_df = pd.read_csv(zst_filepath).set_index('DN')
+        output_df = output_df.join(zst_df, on='DN')
+        logging.info(f"Joined: {zst_filename}")
 
-# Save in file
-output_filepath = os.path.join(zst_final_folder, f'{code_insee}_zst.gpkg')
-output_gdf.to_file(output_filepath, driver="GPKG")
+    # Convert dataframe to geodataframe
+    output_gdf = gpd.GeoDataFrame(output_df, geometry="geometry")
+
+    # Save in file
+    output_filepath = os.path.join(zst_final_folder, f'{code_insee}_{seg_tile_id}_zst.gpkg')
+    output_gdf.to_file(output_filepath, driver="GPKG")
 
 # Elapsed time
 elapsed_time = time.time() - start_time

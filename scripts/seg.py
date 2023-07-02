@@ -29,6 +29,7 @@ code_insee = config['city']['CODE_INSEE']
 
 # Setup data folders
 city_folder = os.path.join(data_folder, code_insee)
+raster_folder = os.path.join(city_folder, 'raster')
 segmentation_folder = os.path.join(city_folder, 'segmentation')
 
 try:
@@ -36,36 +37,41 @@ try:
 except FileExistsError as e:
     pass
 
+for filename in os.listdir(segmentation_folder):
+    os.remove(os.path.join(segmentation_folder, filename))
+
 # Processing
 app = otb.Registry.CreateApplication("Segmentation")
 
-input_filepath = os.path.join(city_folder, f'{code_insee}.tif')
-output_filepath = os.path.join(segmentation_folder, f'{code_insee}_seg.gpkg')
+for raster_file in os.listdir(raster_folder):
 
-params = {
-    'in': input_filepath,
-    'filter': 'meanshift',
-    'filter.meanshift.spatialr': 20,
-    'filter.meanshift.ranger': 10,
-    'filter.meanshift.thres': 0.1,
-    'filter.meanshift.maxiter': 200,
-    'filter.meanshift.minsize': 100, 
-    'mode': 'vector',
-    'mode.vector.out': output_filepath,
-    'mode.vector.outmode': 'ulovw',
-    # 'mode.vector.inmask': 'NC'
-    'mode.vector.neighbor': False,
-    'mode.vector.stitch' : True,
-    'mode.vector.minsize': 1,
-    'mode.vector.simplify': 0.1,
-    'mode.vector.layername': 'layer',
-    'mode.vector.fieldname': 'DN',
-    'mode.vector.tilesize': 0, # If null, optimal size selected according to available RAM
-    'mode.vector.startlabel': 1,
-}
+    input_filepath = os.path.join(raster_folder, raster_file)
+    output_filepath = os.path.join(segmentation_folder, f'{os.path.splitext(raster_file)[0]}_seg.gpkg')
 
-app.SetParameters(params)
-app.ExecuteAndWriteOutput()
+    params = {
+        'in': input_filepath,
+        'filter': 'meanshift',
+        'filter.meanshift.spatialr': 20,
+        'filter.meanshift.ranger': 10,
+        'filter.meanshift.thres': 0.1,
+        'filter.meanshift.maxiter': 200,
+        'filter.meanshift.minsize': 100, 
+        'mode': 'vector',
+        'mode.vector.out': output_filepath,
+        'mode.vector.outmode': 'ulovw',
+        # 'mode.vector.inmask': 'NC'
+        'mode.vector.neighbor': False,
+        'mode.vector.stitch' : True,
+        'mode.vector.minsize': 1,
+        'mode.vector.simplify': 0.1,
+        'mode.vector.layername': 'layer',
+        'mode.vector.fieldname': 'DN',
+        'mode.vector.tilesize': 0, # If null, optimal size selected according to available RAM
+        'mode.vector.startlabel': 1,
+    }
+
+    app.SetParameters(params)
+    app.ExecuteAndWriteOutput()
 
 # Elapsed time
 elapsed_time = time.time() - start_time

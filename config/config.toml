@@ -1,5 +1,8 @@
 [city]
-CODE_INSEE = '91685'
+CODE_INSEE = '91223'
+
+[grid]
+TILE_SIZE = 5000
 
 # Documentation: https://www.orfeo-toolbox.org/CookBook/Applications/app_RadiometricIndices.html
 [radiometrics]

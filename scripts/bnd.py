@@ -82,24 +82,30 @@ for filename in os.listdir(features_folder):
     if 'hte' in filename:
         os.remove(os.path.join(features_folder, filename))
 
-def process_hte_features(set: str):
+for haralick_filename in os.listdir(haralick_folder):
+        
+    prefix = haralick_filename.split('_hte_')[0]
+
     # Get features to compute
-    if set == 'simple':
+    if 'simple' in haralick_filename:
         features = {feature: simple_channels[feature] for feature, feature_bool in config_hte_simple.items() if feature_bool}
-    elif set == 'advanced':
+        input_filepath = os.path.join(haralick_folder, f'{prefix}_hte_simple.tif')
+    elif 'advanced' in haralick_filename:
         features = {feature: advanced_channels[feature] for feature, feature_bool in config_hte_advanced.items() if feature_bool}
-    elif set == 'higher':
+        input_filepath = os.path.join(haralick_folder, f'{prefix}_hte_advanced.tif')
+    elif 'higher' in haralick_filename:
         features = {feature: higher_channels[feature] for feature, feature_bool in config_hte_higher.items() if feature_bool}
+        input_filepath = os.path.join(haralick_folder, f'{prefix}_hte_higher.tif')
 
     logging.info(f'Computed features: {features}')
 
     for feature, channel in features.items():
-        hte_set_filepath = os.path.join(haralick_folder, f'{code_insee}_hte_{set}.tif')
-        feature_filepath = os.path.join(features_folder, f'{code_insee}_hte_{feature}.tif')
+        # hte_set_filepath = os.path.join(haralick_folder, f'{code_insee}_hte_{set}.tif')
+        feature_filepath = os.path.join(features_folder, f'{prefix}_hte_{feature}.tif')
 
         gdal.UseExceptions()
 
-        dataset = gdal.Open(hte_set_filepath, gdal.GA_ReadOnly)
+        dataset = gdal.Open(input_filepath, gdal.GA_ReadOnly)
 
         band_number = channel
         band = dataset.GetRasterBand(band_number)
@@ -114,24 +120,11 @@ def process_hte_features(set: str):
 
         output_dataset.SetGeoTransform(dataset.GetGeoTransform())
 
-        logging.info(f'TEST2')
         output_dataset.SetProjection(dataset.GetProjection())
-
-        logging.info(f'TEST1')
 
         band = None
         dataset = None
         output_dataset = None
-
-# Compute
-if any(config_hte_simple.values()):
-    process_hte_features('simple')
-
-if any(config_hte_advanced.values()):
-    process_hte_features('advanced')
-
-if any(config_hte_higher.values()):
-    process_hte_features('higher')
 
 # Elapsed time
 elapsed_time = time.time() - start_time

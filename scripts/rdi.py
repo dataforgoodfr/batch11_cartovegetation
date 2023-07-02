@@ -30,6 +30,7 @@ config_otb = config['otb']
 
 # Setup data folders
 city_folder = os.path.join(data_folder, code_insee)
+raster_folder = os.path.join(city_folder, 'raster')
 features_folder = os.path.join(city_folder, 'features')
 
 try:
@@ -50,27 +51,30 @@ for section_key, section_value in config['radiometrics'].items():
 
 # Processing
 app = otb.Registry.CreateApplication("RadiometricIndices")
-input_filepath = os.path.join(city_folder, f'{code_insee}.tif')
 
-for feature in features:
-    feature_acronym = feature.split(':')[1]
-    output_filename = f'{code_insee}_rdi_{feature_acronym}.tif'
-    output_filepath = os.path.join(features_folder, output_filename)
+for raster_file in os.listdir(raster_folder):
 
-    params = {
-        'in': input_filepath,
-        'out': output_filepath,
-        'channels.blue': 4,
-        'channels.green': 3,
-        'channels.red': 2,
-        'channels.nir': 1,
-        'channels.mir': 4,
-        'list': [feature],
-        'ram': config_otb['OTB_MAX_RAM_HINT']
-    }
+    input_filepath = os.path.join(raster_folder, raster_file)
 
-    app.SetParameters(params)
-    app.ExecuteAndWriteOutput()
+    for feature in features:
+        feature_acronym = feature.split(':')[1]
+        output_filename = f'{os.path.splitext(raster_file)[0]}_rdi_{feature_acronym}.tif'
+        output_filepath = os.path.join(features_folder, output_filename)
+
+        params = {
+            'in': input_filepath,
+            'out': output_filepath,
+            'channels.blue': 4,
+            'channels.green': 3,
+            'channels.red': 2,
+            'channels.nir': 1,
+            'channels.mir': 4,
+            'list': [feature],
+            'ram': config_otb['OTB_MAX_RAM_HINT']
+        }
+
+        app.SetParameters(params)
+        app.ExecuteAndWriteOutput()
 
 # Elapsed time
 elapsed_time = time.time() - start_time

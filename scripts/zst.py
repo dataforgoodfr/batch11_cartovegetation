@@ -5,6 +5,7 @@ import toml
 import logging
 import subprocess
 import re
+import shutil
 
 
 start_time = time.time()
@@ -34,22 +35,29 @@ features_folder = os.path.join(city_folder, 'features')
 zst_folder = os.path.join(city_folder, 'zonal_stats')
 
 try:
+    if os.path.exists(zst_folder) and os.path.isdir(zst_folder):
+        shutil.rmtree(zst_folder)
+except Exception as e:
+    logging.error(e)
+
+try:
     os.makedirs(zst_folder)  
 except FileExistsError as e:
     pass
 
-# Read vector file reference
-vector_filepath = os.path.join(segmentation_folder, f'{code_insee}_seg.gpkg')
 
 # Processing
 for feature_filename in os.listdir(features_folder):
-    result = re.search(r'\d{5}_(.*).tif', feature_filename)
+    result = re.search(r'\d{5}_(\d)_(.*).tif', feature_filename)
     if result:
-        feature = result.group(1)
+        tile_id, feature = result.groups()
+
+    # Read vector file reference
+    vector_filepath = os.path.join(segmentation_folder, f'{code_insee}_{tile_id}_seg.gpkg')
 
     logging.info(f'Compute zonal mean for {feature}')
-    raster_filepath = os.path.join(features_folder, f'{code_insee}_{feature}.tif')
-    output_filepath = os.path.join(zst_folder, f'{code_insee}_{feature}_zst.csv')
+    raster_filepath = os.path.join(features_folder, f'{code_insee}_{tile_id}_{feature}.tif')
+    output_filepath = os.path.join(zst_folder, f'{code_insee}_{tile_id}_{feature}_zst.csv')
 
     command = [
         "exactextract",

@@ -34,6 +34,7 @@ config_otb = config['otb']
 
 # Setup data folders
 city_folder = os.path.join(data_folder, code_insee)
+raster_folder = os.path.join(city_folder, 'raster')
 haralick_folder = os.path.join(city_folder, 'haralick')
 
 try:
@@ -50,9 +51,11 @@ except FileExistsError as e:
 # Processing
 app = otb.Registry.CreateApplication("HaralickTextureExtraction")
 
-input_filepath = os.path.join(city_folder, f'{code_insee}.tif')
+def compute_hte(set: str, raster_filename: str):
 
-def compute_hte(set: str):
+    input_filepath = os.path.join(raster_folder, raster_filename)
+    output_filepath = os.path.join(haralick_folder, f'{os.path.splitext(raster_filename)[0]}_hte_{set}.tif')
+
     params = {
         'in': input_filepath,
         'channel': 1,
@@ -65,20 +68,20 @@ def compute_hte(set: str):
         'parameters.max': 255,
         'parameters.nbbin': 8,
         'texture': set,
-        'out': os.path.join(city_folder, 'haralick', f'{code_insee}_hte_{set}.tif'),
+        'out': output_filepath,
         'ram' : config_otb['OTB_MAX_RAM_HINT']
     }
     app.SetParameters(params)
     app.ExecuteAndWriteOutput()
 
-if any(config_hte_simple.values()):
-    compute_hte('simple')
+for raster_filename in os.listdir(raster_folder):
 
-if any(config_hte_advanced.values()):
-    compute_hte('advanced')
-
-if any(config_hte_higher.values()):
-    compute_hte('higher')
+    if any(config_hte_simple.values()):
+        compute_hte('simple', raster_filename)
+    if any(config_hte_advanced.values()):
+        compute_hte('advanced', raster_filename)
+    if any(config_hte_higher.values()):
+        compute_hte('higher', raster_filename)
 
 # Elapsed time
 elapsed_time = time.time() - start_time

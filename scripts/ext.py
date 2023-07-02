@@ -5,6 +5,8 @@ import toml
 import json
 import logging
 
+import numpy as np
+
 import requests
 
 from pathlib import Path
@@ -12,6 +14,8 @@ from pathlib import Path
 import geopandas as gpd
 
 from osgeo import gdal
+
+from shapely.geometry import Polygon
 
 import rasterio
 from rasterio.mask import mask
@@ -36,6 +40,7 @@ root_logger.addHandler(console_handler)
 # Config
 config = toml.load('/app/config/config.toml')
 code_insee = config['city']['CODE_INSEE']
+tile_size = config['grid']['TILE_SIZE']
 
 # Get city boundaries using IGN TOPO BD
 url_topo = 'https://wxs.ign.fr/topographie/geoportail/wfs?'
@@ -50,16 +55,49 @@ params_get_features = {
 }
 
 response = requests.get(url_topo, params=params_get_features)
-commune = gpd.read_file(json.dumps(response.json()))
-commune.crs = "EPSG:4326"
+city = gpd.read_file(json.dumps(response.json()))
+city = city.set_crs(epsg=4326)
+city = city.to_crs(epsg=2154)
+
+def extractTiles(city: gpd.GeoDataFrame, tile_size: int) -> gpd.GeoDataFrame:
+    city = city['geometry']
+    xmin, ymin, xmax, ymax = city.total_bounds
+    polygons = []
+    for y in np.arange(ymin, ymax, tile_size):
+        for x in np.arange(xmin, xmax, tile_size):
+            polygon = Polygon([(x, y), 
+                               (x + tile_size, y),
+                               (x + tile_size, y + tile_size),
+                               (x, y + tile_size)])
+            polygons.append(polygon)
+
+    grid: gpd.GeoSeries = gpd.GeoSeries(data=polygons, name='geometry')
+    grid = grid.set_crs(epsg=2154)
+
+    tiles = []
+    for square in grid:
+        tile = square.intersection(city).iloc[0]
+        if not tile.is_empty:
+            tiles.append(tile)
+
+    tiles_serie: gpd.GeoSeries = gpd.GeoSeries(data=tiles, name='geometry')
+    tiles_serie = tiles_serie.set_crs(epsg=2154)    
+
+    return tiles_serie
+
+city_tiles = extractTiles(city, tile_size)
 
 # Setup data folders
 city_folder = os.path.join(data_folder, code_insee)
+raster_folder = os.path.join(city_folder, 'raster')
 
 try:
-    os.makedirs(city_folder)  
+    os.makedirs(raster_folder)  
 except FileExistsError as e:
     pass
+
+for filename in os.listdir(raster_folder):
+    os.remove(os.path.join(raster_folder, filename))
 
 
 data_subfolders = [name for name in os.listdir(data_folder) if os.path.isdir(os.path.join(data_folder, name))]
@@ -87,25 +125,26 @@ for root, dirs, files in os.walk(departement_folder):
                 if os.path.isdir(os.path.join(livraison_folder, name)):
                     tiles_folderpath = Path(os.path.join(livraison_folder, name))
 
-vrt_filepath = os.path.join(city_folder, f'{code_departement}.vrt')
+vrt_filepath = os.path.join(raster_folder, f'{code_departement}.vrt')
 
 tiles_filepaths = [str(x) for x in tiles_folderpath.rglob('*.jp2')]  # list of paths to raster files
 
 dataset = gdal.BuildVRT(vrt_filepath, tiles_filepaths)
-
 dataset.FlushCache()
 
-communeL93 = commune.to_crs(epsg=2154)
 with rasterio.open(vrt_filepath) as raster_vrt:
-    cropped, crop_trans = mask(raster_vrt, [communeL93.iloc[0].geometry], crop=True)
+    
+    for idx, city_tile in enumerate(city_tiles):
+        cropped, crop_trans = mask(raster_vrt, [city_tile], crop=True)
 
-# Specify the path where you want to save the GeoTIFF file
-output_path = os.path.join(city_folder, f'{code_insee}.tif')
+        # Specify the path where you want to save the GeoTIFF file
+        output_path = os.path.join(raster_folder, f'{code_insee}_{idx}.tif')
 
-# Open a new GeoTIFF file in write mode
-with rasterio.open(output_path, 'w', driver='GTiff', height=cropped.shape[1], width=cropped.shape[2], count=cropped.shape[0], dtype=cropped.dtype, crs=raster_vrt.crs, transform=crop_trans) as dst:
-    # Write the cropped data to the GeoTIFF file
-    dst.write(cropped)
+        # Open a new GeoTIFF file in write mode
+        with rasterio.open(output_path, 'w', driver='GTiff', height=cropped.shape[1], width=cropped.shape[2], count=cropped.shape[0], 
+                            dtype=cropped.dtype, crs=raster_vrt.crs, transform=crop_trans) as output:
+            # Write the cropped data to the GeoTIFF file
+            output.write(cropped)
 
 os.remove(vrt_filepath)
 
